@@ -15,6 +15,10 @@ class ParkingRecordAdmin(admin.ModelAdmin):
     search_fields = ['vehicle__license_plate', 'parking_spot__spot_number']
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        ''' Quando um administrador vai registrar a entrada de um novo veículo,
+        o formulário só permite selecionar vagas que estão desocupadas,
+        prevenindo erros.
+        '''
         if db_field.name == 'parking_spot' and not request.resolver_match.url_name.endswith('change'):
             kwargs['queryset'] = ParkingSpot.objects.filter(is_occupied=False)
 
