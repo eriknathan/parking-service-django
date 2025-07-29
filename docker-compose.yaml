@@ -1,0 +1,39 @@
+services:
+  parking-service-app:
+    container_name: parking-service-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 8000:8000
+    depends_on:
+      parking-service-db:
+        condition: service_healthy
+    networks:
+      - parking_service
+  
+  parking-service-db:
+    container_name: parking-service-db
+    image: postgres:15
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=parking_service
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d parking_service"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - parking_service
+
+volumes:
+  postgres_data:
+
+networks:
+  parking_service:
